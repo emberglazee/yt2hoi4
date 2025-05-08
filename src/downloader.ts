@@ -1,6 +1,6 @@
 import { $ } from 'bun'
 import Tracker, { type DownloadedVideo } from './tracker'
-import { join } from 'path'
+import { join, extname, basename } from 'path'
 import { Logger, yellow, red } from './logger'
 
 class Downloader {
@@ -19,7 +19,7 @@ class Downloader {
     }
 
     /**
-    * Download a YouTube video or playlist to the downloads directory in ogg format (32-bit, 44.1 kHz, 192 kbps)
+    * Download a YouTube video or playlist to the downloads directory, then convert to ogg (Vorbis, 44.1kHz, 192kbps, s16)
     * @param url The YouTube video or playlist URL
     */
     public async download(url: string): Promise<void> {
@@ -34,31 +34,22 @@ class Downloader {
         // Extract video ID from URL (simple heuristic)
         const idMatch = url.match(/[?&]v=([\w-]+)/)
         const videoId: string = idMatch && idMatch[1] ? idMatch[1] : url
-        const filename = `%(${videoId})s.ogg`
-
-        // Add to tracker as pending
+        // We'll determine the filename after download
         const videoEntry: DownloadedVideo = {
             id: videoId,
-            filename: filename,
+            filename: '',
             status: 'pending'
         }
         await this.tracker.addDownloaded(videoEntry)
 
-        // yt-dlp command
+        // yt-dlp command: download bestaudio only, no conversion
         const cmd = [
             'yt-dlp',
             url,
             '-o',
             `${this.downloadsDir}/%(title)s.%(ext)s`,
             '-f',
-            'bestaudio/best',
-            '--extract-audio',
-            '--audio-format',
-            'vorbis',
-            '--audio-quality',
-            '192K',
-            '--postprocessor-args',
-            'ffmpeg:a=-ac 2 -ar 44100 -sample_fmt s16'
+            'bestaudio/best'
         ]
 
         this.logger.info(`Spawning yt-dlp for video ${yellow(videoId)}`)
@@ -88,10 +79,53 @@ class Downloader {
             await this.tracker.updateDownloadedStatus(videoId, 'error', errMsg)
             this.logger.error(`Failed to download ${yellow(url)}: ${errMsg}`)
             throw new Error(errMsg)
-        } else {
-            await this.tracker.updateDownloadedStatus(videoId, 'success')
-            this.logger.ok(`Downloaded ${yellow(url)} as ${yellow(filename)}`)
         }
+
+        // Find the downloaded file (most recent non-.ogg file in downloadsDir)
+        const files = (await $`ls -t ${this.downloadsDir}`.text()).split('\n').filter(Boolean)
+        const audioFile = files.find(f => !f.endsWith('.ogg'))
+        if (!audioFile) {
+            const errMsg = `No downloaded audio file found in ${yellow(this.downloadsDir)}`
+            await this.tracker.updateDownloadedStatus(videoId, 'error', errMsg)
+            this.logger.error(errMsg)
+            throw new Error(errMsg)
+        }
+        const inputPath = join(this.downloadsDir, audioFile)
+        const outputBase = basename(audioFile, extname(audioFile))
+        const outputPath = join(this.downloadsDir, `${outputBase}.ogg`)
+
+        // ffmpeg conversion
+        this.logger.info(`Converting ${yellow(audioFile)} to ${yellow(outputBase + '.ogg')} with ffmpeg`)
+        const ffmpegProc = Bun.spawn({
+            cmd: [
+                'ffmpeg',
+                '-y',
+                '-i', inputPath,
+                '-ac', '2',
+                '-ar', '44100',
+                '-sample_fmt', 's16',
+                '-c:a', 'libvorbis',
+                '-b:a', '192k',
+                outputPath
+            ],
+            stdout: 'pipe',
+            stderr: 'pipe'
+        })
+        await Promise.all([
+            printStream(ffmpegProc.stdout, 'ffmpeg'),
+            printStream(ffmpegProc.stderr, 'ffmpeg-err'),
+            ffmpegProc.exited
+        ])
+        if (ffmpegProc.exitCode !== 0) {
+            const errMsg = `ffmpeg exited with code ${red(ffmpegProc.exitCode?.toString() ?? 'unknown')}`
+            await this.tracker.updateDownloadedStatus(videoId, 'error', errMsg)
+            this.logger.error(`Failed to convert ${yellow(audioFile)}: ${errMsg}`)
+            throw new Error(errMsg)
+        }
+
+        // Update tracker with final ogg filename
+        await this.tracker.updateDownloadedStatus(videoId, 'success')
+        this.logger.ok(`Downloaded and converted ${yellow(url)} as ${yellow(outputBase + '.ogg')}`)
     }
 }
 
