@@ -1,9 +1,10 @@
 import { write } from 'bun'
 import Tracker from './tracker'
 import { Logger, yellow } from './logger'
+import { join } from 'path'
 
-const OUTPUT_ROOT = './output'
-const HOI4_MOD_VERSION = '1.16.4'
+const OUTPUT_ROOT = './output' as const
+const HOI4_MOD_VERSION = '1.16.4' as const
 
 class ModGenerator {
     private static instance: ModGenerator
@@ -31,16 +32,17 @@ class ModGenerator {
         this.logger.info(`Setting up mod structure for ${yellow(modName)}`)
 
         // Prepare folder structure
-        const modRoot = `${OUTPUT_ROOT}/${modName}`
-        const musicDir = `${modRoot}/music/radio/${modName}`
-        const localisationDir = `${modRoot}/localisation` // important: hoi4 uses "localisation" spelling, not "localization"
-        const interfaceDir = `${modRoot}/interface`
-        const gfxDir = `${modRoot}/gfx/interface`
+        const modRoot = `${OUTPUT_ROOT}/${modName}` as const
+        const musicDir = `${modRoot}/music/radio/${modName}` as const
+        const localisationDir = `${modRoot}/localisation` as const // important: hoi4 uses "localisation" spelling, not "localization"
+        const interfaceDir = `${modRoot}/interface` as const
+        const gfxInterfaceDir = `${modRoot}/gfx/interface` as const
+        const gfxDir = `${modRoot}/gfx` as const
 
         await Bun.$`mkdir -p ${musicDir}`
         await Bun.$`mkdir -p ${localisationDir}`
         await Bun.$`mkdir -p ${interfaceDir}`
-        await Bun.$`mkdir -p ${gfxDir}`
+        await Bun.$`mkdir -p ${gfxInterfaceDir}`
         this.logger.ok(`Created mod folder structure for ${yellow(modName)}`)
 
         // Copy .ogg files to music/radio/modName
@@ -85,8 +87,8 @@ supported_version="${HOI4_MOD_VERSION}"
         // .gfx file
         const gfxContent = `spriteTypes = {
     spriteType = {
-        name = "GFX_${modName}_album_art"
-        texturefile = "gfx/${modName}_album_art.dds"
+        name = "GFX_${modName}_faceplate"
+        texturefile = "gfx/${modName}_faceplate.dds"
         noOfFrames = 2
     }
 }`
@@ -210,7 +212,7 @@ supported_version="${HOI4_MOD_VERSION}"
 		checkBoxType = {
 			name = "select_station_button"
 			position = { x = 0 y = 0 }
-			quadTextureSprite = "GFX_${modName}_album_art"
+			quadTextureSprite = "GFX_${modName}_faceplate"
 			clicksound = decisions_ui_button
 		}
 	}
@@ -218,7 +220,8 @@ supported_version="${HOI4_MOD_VERSION}"
 `
         await write(`${interfaceDir}/${modName}.gui`, guiContent)
         // .dds placeholder
-        await write(`${gfxDir}/${modName}.dds`, '') // Placeholder, real DDS should be added later
+        const dds = Bun.file(join(__dirname, '../radio_station.dds'))
+        await write(`${gfxDir}/${modName}_faceplate.dds`, dds)
         this.logger.ok(`Wrote interface files for ${yellow(modName)}`)
 
         // Write music script
