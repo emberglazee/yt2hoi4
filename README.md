@@ -16,17 +16,17 @@ And was tested on:
 - yt-dlp v2025.04.30
 - ffmpeg v7.1
 - Hearts of Iron IV v1.16.5
-- Windows 11 24H2 (might test for Ubuntu)
+- Windows 11 24H2 (might personally test for Ubuntu)
 
 ## Installation
 
 Install [yt-dlp](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#installation), [FFmpeg](https://ffmpeg.org/download.html), and [Bun](https://bun.sh)
 
 ```bash
-# Ensure yt-dlp is on PATH and properly works with YouTube videos (regular yt-dlp updates recommended)
+# Ensure yt-dlp is on PATH (optionally check if your current version works with YouTube right now; regular updates recommended)
 $ yt-dlp -v
 2025.04.30
-# Do the same with ffmpeg
+# Do the same with FFmpeg
 $ ffmpeg -version
 ffmpeg version 7.1-full_build-www.gyan.dev Copyright (c) 2000-2024 the FFmpeg developers
 built with gcc 14.2.0 (Rev1, Built by MSYS2 project)
@@ -42,8 +42,10 @@ $ bun install
 
 ```bash
 $ bun start --url <yt-dlp_compatible_link> --modName <mod-name>
-# Or omit values and use positionals
+# Or use positionals:
 $ bun start <yt-dlp_compatible_link> <mod-name>
+# Then copy paste the contents of the `output` folder into the user mods folder (on Windows its `Documents\Paradox Interactive\Hearts of Iron IV\mods)
+# Paradox Launcher will not tell you about a new user mod, go into the mod list yourself and select the mod for a playset
 
 # Includes basic cleanup scripts; if nothing works for your shell, just delete the `output` and `downloads` folders, and the `tracker.json` file
 $ pwsh clear.ps1 # for PowerShell
