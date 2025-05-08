@@ -73,7 +73,7 @@ path="mod/${modName}"
 supported_version="${HOI4_MOD_VERSION}"
 version="${version}"
 `
-        await write(`${OUTPUT_ROOT}/descriptor.mod`, externalDescriptor)
+        await write(`${OUTPUT_ROOT}/${modName}.mod`, externalDescriptor)
         this.logger.ok(`Wrote external descriptor.mod for ${yellow(modName)}`)
 
 
