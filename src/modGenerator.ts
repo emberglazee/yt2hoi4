@@ -48,22 +48,20 @@ class ModGenerator {
 
         // Copy .ogg files to music/modName
         await this.tracker.setCurrentStep('mod:copy_music')
-        this.logger.info(`Copying music files for ${yellow(modName)}`)
         for (const src of trackFiles) {
             const base = src.replace(/^.*\//, '')
             const dest = `${musicDir}/${base}`
             await Bun.$`cp ./downloads/${base} ${dest}`
-            this.logger.ok(`Copied ${yellow(base)} to ${yellow(dest)}`)
+            this.logger.info(`Copied ${yellow(base)} to ${yellow(dest)}`)
         }
 
         // Write descriptor.mod
         await this.tracker.setCurrentStep('mod:descriptor')
-        this.logger.info(`Writing internal descriptor.mod for ${yellow(modName)}`)
         const descriptor = `name="${modName}"
 supported_version="${HOI4_MOD_VERSION}"
 `
         await write(`${modRoot}/descriptor.mod`, descriptor)
-        this.logger.ok(`Wrote internal descriptor.mod for ${yellow(modName)}`)
+        this.logger.ok(`Wrote mod-specific descriptor.mod for ${yellow(modName)}`)
         // User-managed mods (not by Steam Workshop) require a manual definition (descriptor) outside the mod folder
         const externalDescriptor = `name="${modName}"
 tags={
@@ -74,12 +72,11 @@ supported_version="${HOI4_MOD_VERSION}"
 version="${version}"
 `
         await write(`${OUTPUT_ROOT}/${modName}.mod`, externalDescriptor)
-        this.logger.ok(`Wrote external descriptor.mod for ${yellow(modName)}`)
+        this.logger.ok(`Wrote user-specific descriptor.mod for ${yellow(modName)}`)
 
 
         // Write localization file
         await this.tracker.setCurrentStep('mod:localisation')
-        this.logger.info(`Writing localization for ${yellow(modName)}`)
         const locFile = `${modName}_l_english.yml`
         let locContent = `l_english:
   ${modName}: "${modName} Radio"
@@ -91,13 +88,12 @@ version="${version}"
 `
         }
         // Convert to UTF-8 BOM
-        locContent = Buffer.concat([Buffer.from([0xEF, 0xBB, 0xBF]), Buffer.from(locContent)]).toString('utf-8')
-        await write(`${localisationDir}/${locFile}`, locContent)
+        const locBuffer = Buffer.concat([Buffer.from([0xEF, 0xBB, 0xBF]), Buffer.from(locContent)])
+        await write(`${localisationDir}/${locFile}`, locBuffer)
         this.logger.ok(`Wrote localization file ${yellow(locFile)}`)
 
         // Write interface files (generate .gfx and .gui, placeholder .dds)
         await this.tracker.setCurrentStep('mod:interface')
-        this.logger.info(`Writing interface files for ${yellow(modName)}`)
         // .gfx file
         const gfxContent = `spriteTypes = {
     spriteType = {
@@ -240,7 +236,6 @@ version="${version}"
 
         // Write music script
         await this.tracker.setCurrentStep('mod:music_script')
-        this.logger.info(`Writing music script for ${yellow(modName)}`)
         let musicScript = `music_station = "${modName}"
 `
         for (const src of trackFiles) {
@@ -261,7 +256,6 @@ version="${version}"
         this.logger.ok(`Wrote music script for ${yellow(modName)}`)
 
         await this.tracker.setCurrentStep('mod:asset_files')
-        this.logger.info(`Writing music asset file for ${yellow(modName)}`)
         let assetFile = ''
         for (const src of trackFiles) {
             const base = src.replace(/^.*\//, '')
