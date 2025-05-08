@@ -51,7 +51,7 @@ $ clear.cmd # for Command Prompt (or double click in Explorer)
 ```
 ## Screenshot
 
-![image](https://r2.e-z.host/553257c7-6ffa-45c8-9d1c-531ea7d264db/ds83iivs.png)
+![screenshot](https://github.com/user-attachments/assets/e26f222a-966c-435c-a41b-cf78787fb7ed)
 
 ## Why?
 
