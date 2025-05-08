@@ -2,7 +2,7 @@
 downloads/
 output/
 tracker.json
-
+cookies.txt
 # dependencies (bun install)
 node_modules
 

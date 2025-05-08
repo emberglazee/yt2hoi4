@@ -2,6 +2,7 @@ import { $ } from 'bun'
 import Tracker, { type DownloadedVideo } from './tracker'
 import { join, extname, basename } from 'path'
 import { Logger, yellow, red } from './logger'
+import settings from '../settings'
 
 class Downloader {
     private static instance: Downloader
@@ -42,20 +43,12 @@ class Downloader {
         }
         await this.tracker.addDownloaded(videoEntry)
 
-        // yt-dlp command: download bestaudio only, no conversion
-        const cmd = [
-            'yt-dlp',
-            url,
-            '-o',
-            `${this.downloadsDir}/%(title)s.%(ext)s`,
-            '-f',
-            'bestaudio/best'
-        ]
+        const cmd = settings.downloader.getCmd(url, this.downloadsDir)
 
         this.logger.info(`Spawning yt-dlp for video ${yellow(videoId)}`)
 
         const proc = Bun.spawn({
-            cmd,
+            cmd: [...cmd],
             stdout: 'pipe',
             stderr: 'pipe'
         })
@@ -81,50 +74,60 @@ class Downloader {
             throw new Error(errMsg)
         }
 
-        // Find the downloaded file (most recent non-.ogg file in downloadsDir)
+        // Find all downloaded files (non-.ogg files in downloadsDir)
         const files = (await $`ls -t ${this.downloadsDir}`.text()).split('\n').filter(Boolean)
-        const audioFile = files.find(f => !f.endsWith('.ogg'))
-        if (!audioFile) {
-            const errMsg = `No downloaded audio file found in ${yellow(this.downloadsDir)}`
+        const audioFiles = files.filter(f => !f.endsWith('.ogg'))
+        if (audioFiles.length === 0) {
+            const errMsg = `No downloaded audio files found in ${yellow(this.downloadsDir)}`
             await this.tracker.updateDownloadedStatus(videoId, 'error', errMsg)
             this.logger.error(errMsg)
             throw new Error(errMsg)
         }
-        const inputPath = join(this.downloadsDir, audioFile)
-        const outputBase = basename(audioFile, extname(audioFile))
-        const outputPath = join(this.downloadsDir, `${outputBase}.ogg`)
 
-        // ffmpeg conversion
-        this.logger.info(`Converting ${yellow(audioFile)} to ${yellow(outputBase + '.ogg')} with ffmpeg`)
-        const ffmpegProc = Bun.spawn({
-            cmd: [
-                'ffmpeg',
-                '-y',
-                '-i', inputPath,
-                '-ac', '2',
-                '-ar', '44100',
-                '-c:a', 'libvorbis',
-                '-b:a', '192k',
-                outputPath
-            ],
-            stdout: 'pipe',
-            stderr: 'pipe'
-        })
-        await Promise.all([
-            printStream(ffmpegProc.stdout, 'ffmpeg'),
-            printStream(ffmpegProc.stderr, 'ffmpeg-err'),
-            ffmpegProc.exited
-        ])
-        if (ffmpegProc.exitCode !== 0) {
-            const errMsg = `ffmpeg exited with code ${red(ffmpegProc.exitCode?.toString() ?? 'unknown')}`
-            await this.tracker.updateDownloadedStatus(videoId, 'error', errMsg)
-            this.logger.error(`Failed to convert ${yellow(audioFile)}: ${errMsg}`)
-            throw new Error(errMsg)
+        let allSuccess = true
+        for (const audioFile of audioFiles) {
+            const inputPath = join(this.downloadsDir, audioFile)
+            const outputBase = basename(audioFile, extname(audioFile))
+            const outputPath = join(this.downloadsDir, `${outputBase}.ogg`)
+
+            // ffmpeg conversion
+            this.logger.info(`Converting ${yellow(audioFile)} to ${yellow(outputBase + '.ogg')} with ffmpeg`)
+            const ffmpegProc = Bun.spawn({
+                cmd: [
+                    'ffmpeg',
+                    '-y',
+                    '-i', inputPath,
+                    '-ac', '2',
+                    '-ar', '44100',
+                    '-c:a', 'libvorbis',
+                    '-b:a', '192k',
+                    outputPath
+                ],
+                stdout: 'pipe',
+                stderr: 'pipe'
+            })
+            await Promise.all([
+                printStream(ffmpegProc.stdout, 'ffmpeg'),
+                printStream(ffmpegProc.stderr, 'ffmpeg-err'),
+                ffmpegProc.exited
+            ])
+            if (ffmpegProc.exitCode !== 0) {
+                const errMsg = `ffmpeg exited with code ${red(ffmpegProc.exitCode?.toString() ?? 'unknown')} for file ${audioFile}`
+                await this.tracker.updateDownloadedStatus(videoId, 'error', errMsg)
+                this.logger.error(`Failed to convert ${yellow(audioFile)}: ${errMsg}`)
+                allSuccess = false
+                continue
+            }
+            this.logger.ok(`Converted ${yellow(audioFile)} as ${yellow(outputBase + '.ogg')}`)
         }
 
-        // Update tracker with final ogg filename
-        await this.tracker.updateDownloadedStatus(videoId, 'success')
-        this.logger.ok(`Downloaded and converted ${yellow(url)} as ${yellow(outputBase + '.ogg')}`)
+        // Update tracker with final ogg filename if all succeeded
+        if (allSuccess) {
+            await this.tracker.updateDownloadedStatus(videoId, 'success')
+            this.logger.ok(`Downloaded and converted ${yellow(url)} to .ogg files`)
+        } else {
+            this.logger.error(`Some files failed to convert for ${yellow(url)}`)
+        }
     }
 }
 

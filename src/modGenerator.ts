@@ -5,7 +5,7 @@ import { join } from 'path'
 import { version } from '../package.json'
 
 const OUTPUT_ROOT = './output' as const
-const HOI4_MOD_VERSION = '1.16.4' as const
+const HOI4_MOD_VERSION = '1.16.5' as const
 
 class ModGenerator {
     private static instance: ModGenerator
