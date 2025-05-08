@@ -2,6 +2,7 @@ import { write } from 'bun'
 import Tracker from './tracker'
 import { Logger, yellow } from './logger'
 import { join } from 'path'
+import { version } from '../package.json'
 
 const OUTPUT_ROOT = './output' as const
 const HOI4_MOD_VERSION = '1.16.4' as const
@@ -57,13 +58,24 @@ class ModGenerator {
 
         // Write descriptor.mod
         await this.tracker.setCurrentStep('mod:descriptor')
-        this.logger.info(`Writing descriptor.mod for ${yellow(modName)}`)
+        this.logger.info(`Writing internal descriptor.mod for ${yellow(modName)}`)
         const descriptor = `name="${modName}"
-path="mod/${modName}"
 supported_version="${HOI4_MOD_VERSION}"
 `
         await write(`${modRoot}/descriptor.mod`, descriptor)
-        this.logger.ok(`Wrote descriptor.mod for ${yellow(modName)}`)
+        this.logger.ok(`Wrote internal descriptor.mod for ${yellow(modName)}`)
+        // User-managed mods (not by Steam Workshop) require a manual definition (descriptor) outside the mod folder
+        const externalDescriptor = `name="${modName}"
+tags={
+    "Sound"
+}
+path="mod/${modName}"
+supported_version="${HOI4_MOD_VERSION}"
+version="${version}"
+`
+        await write(`${OUTPUT_ROOT}/descriptor.mod`, externalDescriptor)
+        this.logger.ok(`Wrote external descriptor.mod for ${yellow(modName)}`)
+
 
         // Write localisation file
         await this.tracker.setCurrentStep('mod:localisation')
