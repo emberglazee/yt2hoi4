@@ -6,7 +6,7 @@ import { parseArgs } from 'util'
 
 const logger = new Logger()
 
-const { values } = parseArgs({
+const { values, positionals } = parseArgs({
     args: Bun.argv.slice(2),
     options: {
         url: {
@@ -18,14 +18,23 @@ const { values } = parseArgs({
             description: 'The name of the mod to generate'
         }
     },
-    strict: true
+    strict: true,
+    allowPositionals: true
 })
 
-if (!values.url || !values.modName) {
-    logger.error(`Usage: bun run src/index.ts <${yellow('youtube_url')}> <${yellow('mod_name')}>`)
+let url = values.url
+let modName = values.modName
+
+if (!url && positionals.length > 0) {
+    url = positionals[0]
+}
+if (!modName && positionals.length > 1) {
+    modName = positionals[1]
+}
+if (!url || !modName) {
+    logger.error('Missing required arguments: --url and --modName (or provide as positionals)')
     process.exit(1)
 }
-const { url, modName } = values
 
 try {
     logger.info(`Starting download for ${yellow(url)}`)
