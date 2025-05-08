@@ -77,9 +77,9 @@ version="${version}"
         this.logger.ok(`Wrote external descriptor.mod for ${yellow(modName)}`)
 
 
-        // Write localisation file
+        // Write localization file
         await this.tracker.setCurrentStep('mod:localisation')
-        this.logger.info(`Writing localisation for ${yellow(modName)}`)
+        this.logger.info(`Writing localization for ${yellow(modName)}`)
         const locFile = `${modName}_l_english.yml`
         let locContent = `l_english:
   ${modName}: "${modName} Radio"
@@ -90,8 +90,10 @@ version="${version}"
             locContent += `  ${trackId}: "${trackId}"
 `
         }
+        // Convert to UTF-8 BOM
+        locContent = Buffer.concat([Buffer.from([0xEF, 0xBB, 0xBF]), Buffer.from(locContent)]).toString('utf-8')
         await write(`${localisationDir}/${locFile}`, locContent)
-        this.logger.ok(`Wrote localisation file ${yellow(locFile)}`)
+        this.logger.ok(`Wrote localization file ${yellow(locFile)}`)
 
         // Write interface files (generate .gfx and .gui, placeholder .dds)
         await this.tracker.setCurrentStep('mod:interface')
@@ -183,9 +185,9 @@ version="${version}"
 			position = { x = 100 y = 45}
 			size = { width = 75 height = 18 }
 			tileSize = { width = 12 height = 12}
-			maxValue =100
-			minValue =0
-			stepSize =1
+			maxValue = 100
+			minValue = 0
+			stepSize = 1
 			startValue = 50
 			horizontal = yes
 			orientation = lower_left
