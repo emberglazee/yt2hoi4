@@ -54,7 +54,7 @@ class Downloader {
             'bestaudio/best',
             '--extract-audio',
             '--audio-format',
-            'ogg',
+            'vorbis',
             '--audio-quality',
             '192K',
             '--postprocessor-args',
