@@ -103,7 +103,6 @@ class Downloader {
                 '-i', inputPath,
                 '-ac', '2',
                 '-ar', '44100',
-                '-sample_fmt', 's16',
                 '-c:a', 'libvorbis',
                 '-b:a', '192k',
                 outputPath
