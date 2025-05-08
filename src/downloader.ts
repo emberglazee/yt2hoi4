@@ -58,7 +58,7 @@ class Downloader {
             '--audio-quality',
             '192K',
             '--postprocessor-args',
-            '-ac 2 -ar 44100 -sample_fmt s32'
+            'ffmpeg:a=-ac 2 -ar 44100 -sample_fmt s16'
         ]
 
         this.logger.info(`Spawning yt-dlp for video ${yellow(videoId)}`)
