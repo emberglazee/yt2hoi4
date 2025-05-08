@@ -34,7 +34,7 @@ class ModGenerator {
 
         // Prepare folder structure
         const modRoot = `${OUTPUT_ROOT}/${modName}` as const
-        const musicDir = `${modRoot}/music/radio/${modName}` as const
+        const musicDir = `${modRoot}/music/${modName}` as const
         const localisationDir = `${modRoot}/localisation` as const // important: hoi4 uses "localisation" spelling, not "localization"
         const interfaceDir = `${modRoot}/interface` as const
         const gfxInterfaceDir = `${modRoot}/gfx/interface` as const
@@ -46,7 +46,7 @@ class ModGenerator {
         await Bun.$`mkdir -p ${gfxInterfaceDir}`
         this.logger.ok(`Created mod folder structure for ${yellow(modName)}`)
 
-        // Copy .ogg files to music/radio/modName
+        // Copy .ogg files to music/modName
         await this.tracker.setCurrentStep('mod:copy_music')
         this.logger.info(`Copying music files for ${yellow(modName)}`)
         for (const src of trackFiles) {
@@ -239,20 +239,40 @@ version="${version}"
         // Write music script
         await this.tracker.setCurrentStep('mod:music_script')
         this.logger.info(`Writing music script for ${yellow(modName)}`)
-        let musicScript = `music = {
-  name = "${modName}"
-  tracks = {
+        let musicScript = `music_station = "${modName}"
 `
         for (const src of trackFiles) {
             const base = src.replace(/^.*\//, '')
             const trackId = base.replace(/\..*$/, '')
-            musicScript += `    "${modName}/${trackId}"
+            musicScript += `music = {
+    song = "${trackId}"
+    chance = {
+        factor = 1
+        modifier = {
+            factor = 1
+        }
+    }
+}
 `
         }
-        musicScript += `  }
-}`
-        await write(`${modRoot}/music/${modName}_music.txt`, musicScript)
+        await write(`${musicDir}/${modName}_music.txt`, musicScript)
         this.logger.ok(`Wrote music script for ${yellow(modName)}`)
+
+        await this.tracker.setCurrentStep('mod:asset_files')
+        this.logger.info(`Writing music asset file for ${yellow(modName)}`)
+        let assetFile = ''
+        for (const src of trackFiles) {
+            const base = src.replace(/^.*\//, '')
+            const trackId = base.replace(/\..*$/, '')
+            assetFile += `music = {
+    name = "${trackId}"
+    file = "${base}"
+    volume = 0.65
+}
+`
+        }
+        await write(`${musicDir}/${modName}_music.asset`, assetFile)
+        this.logger.ok(`Wrote music asset file for ${yellow(modName)}`)
 
         await this.tracker.setCurrentStep('mod:done')
         this.logger.ok(`Mod generation complete for ${yellow(modName)}`)

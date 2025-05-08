@@ -9,6 +9,7 @@ export type TrackerStep =
 | 'mod:localisation'
 | 'mod:interface'
 | 'mod:music_script'
+| 'mod:asset_files'
 | 'mod:done'
 | null
 
