@@ -1,10 +1,12 @@
 {
   "name": "yt2hoi4",
+  "description": "Download a Youtube playlist and generate a Hearts of Iron 4 radio station (music) mod",
+  "version": "0.0.1+hoi4-1.16.4",
   "module": "src/index.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "^1.2.12"
   },
   "peerDependencies": {
     "typescript": "^5"

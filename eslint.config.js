@@ -22,7 +22,9 @@ export default [
         varsIgnorePattern: '^_'
       }],
       '@typescript-eslint/no-unused-expressions': 'off',
-      'arrow-parens': ['error', 'as-needed']
+      'arrow-parens': ['error', 'as-needed'],
+      'quotes': ['error', 'single'],
+      'comma-dangle': ['error', 'never']
     }
-  },
+  }
 ]
