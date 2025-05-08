@@ -27,32 +27,28 @@ if (!values.url || !values.modName) {
 }
 const { url, modName } = values
 
-async function main() {
-    try {
-        logger.info(`Starting download for ${yellow(url)}`)
-        const downloader = Downloader.getInstance()
-        await downloader.download(url)
-        logger.ok(`Download complete for ${yellow(url)}`)
+try {
+    logger.info(`Starting download for ${yellow(url)}`)
+    const downloader = Downloader.getInstance()
+    await downloader.download(url)
+    logger.ok(`Download complete for ${yellow(url)}`)
 
-        // For demo, assume the downloaded file is in downloads/ and has .ogg extension
-        // In a real scenario, you would want to get the actual filename from the tracker
-        // Here, we just glob for .ogg files in downloads/
-        const { downloadsDir } = downloader
-        const files = (await $`ls ${downloadsDir}`.text()).split('\n').filter(Boolean)
-        const oggFiles = files.filter(f => f.endsWith('.ogg'))
-        if (oggFiles.length === 0) {
-            logger.error(`No .ogg files found in ${yellow(downloadsDir)}`)
-            process.exit(1)
-        }
-
-        logger.info(`Generating mod ${yellow(modName)} with tracks: ${oggFiles.map(f => yellow(f)).join(', ')}`)
-        const modGen = await ModGenerator.getInstance()
-        await modGen.generateMod(modName, oggFiles)
-        logger.ok(`Mod generation complete for ${yellow(modName)}`)
-    } catch (e) {
-        logger.error(`Fatal error: ${red(e instanceof Error ? e.message : String(e))}`)
+    // For demo, assume the downloaded file is in downloads/ and has .ogg extension
+    // In a real scenario, you would want to get the actual filename from the tracker
+    // Here, we just glob for .ogg files in downloads/
+    const { downloadsDir } = downloader
+    const files = (await $`ls ${downloadsDir}`.text()).split('\n').filter(Boolean)
+    const oggFiles = files.filter(f => f.endsWith('.ogg'))
+    if (oggFiles.length === 0) {
+        logger.error(`No .ogg files found in ${yellow(downloadsDir)}`)
         process.exit(1)
     }
-}
 
-main()
+    logger.info(`Generating mod ${yellow(modName)} with tracks: ${oggFiles.map(f => yellow(f)).join(', ')}`)
+    const modGen = await ModGenerator.getInstance()
+    await modGen.generateMod(modName, oggFiles)
+    logger.ok(`Mod generation complete for ${yellow(modName)}`)
+} catch (e) {
+    logger.error(`Fatal error: ${red(e instanceof Error ? e.message : String(e))}`)
+    process.exit(1)
+}
