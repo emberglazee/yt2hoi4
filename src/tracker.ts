@@ -58,9 +58,7 @@ class Tracker {
     }
 
     private async save() {
-        this.logger.info(`Saving tracker state to ${yellow(TRACKER_PATH)}`)
         await write(TRACKER_PATH, JSON.stringify(this.state, null, 2))
-        this.logger.ok(`Saved tracker state to ${yellow(TRACKER_PATH)}`)
     }
 
     public getDownloaded() {
@@ -71,7 +69,6 @@ class Tracker {
         if (!this.state.downloaded.find(v => v.id === video.id)) {
             this.state.downloaded.push(video)
             await this.save()
-            this.logger.ok(`Added video ${yellow(video.id)} to tracker`)
         }
     }
 
@@ -83,8 +80,6 @@ class Tracker {
             await this.save()
             if (status === 'error') {
                 this.logger.error(`Download ${yellow(id)} failed: ${red(error ?? 'unknown error')}`)
-            } else {
-                this.logger.ok(`Updated status for ${yellow(id)} to ${yellow(status)}`)
             }
         }
     }
@@ -96,11 +91,9 @@ class Tracker {
     public async setCurrentStep(step: TrackerStep) {
         this.state.currentStep = step
         await this.save()
-        this.logger.info(`Set current step to ${yellow(step ?? 'null')}`)
     }
 
     public async reset() {
-        this.logger.warn('Resetting tracker state to empty')
         this.state = { downloaded: [], currentStep: null }
         await this.save()
         this.logger.ok('Tracker state reset')

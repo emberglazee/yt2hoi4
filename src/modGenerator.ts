@@ -33,7 +33,7 @@ class ModGenerator {
         // Prepare folder structure
         const modRoot = `${OUTPUT_ROOT}/${modName}`
         const musicDir = `${modRoot}/music/radio/${modName}`
-        const localisationDir = `${modRoot}/localisation`
+        const localisationDir = `${modRoot}/localisation` // important: hoi4 uses "localisation" spelling, not "localization"
         const interfaceDir = `${modRoot}/interface`
         const gfxDir = `${modRoot}/gfx/interface`
 
@@ -72,7 +72,7 @@ supported_version="${HOI4_MOD_VERSION}"
 `
         for (const src of trackFiles) {
             const base = src.replace(/^.*\//, '')
-            const trackId = base.replace(/\..*$/, '')
+            const trackId = base.replace(/\..*$/, '').replace(/ /g, '_')
             locContent += `  ${trackId}: "${trackId}"
 `
         }
