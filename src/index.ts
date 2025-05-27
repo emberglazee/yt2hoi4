@@ -22,6 +22,11 @@ const argv = yargs(hideBin(process.argv))
         description: 'Additional arguments to pass to yt-dlp (e.g. --ytdlp-args --cookies cookies.txt --throttle-rate 100K)',
         string: true
     })
+    .option('use-thumbnail', {
+        type: 'boolean',
+        description: 'Use the playlist/video thumbnail as the radio station faceplate',
+        default: false
+    })
     .demandOption(['url', 'mod-name'], 'Please provide both --url and --mod-name arguments')
     .help()
     .parseSync()
@@ -42,7 +47,7 @@ try {
 
     logger.info(`Generating mod ${yellow(argv.modName)} with tracks: ${oggFiles.map(f => yellow(f)).join(', ')}`)
     const modGen = await ModGenerator.getInstance()
-    await modGen.generateMod(argv.modName, oggFiles, '1.16.8')
+    await modGen.generateMod(argv.modName, oggFiles, '1.16.8', argv.url, argv.useThumbnail)
     logger.ok(`Mod generation complete for ${yellow(argv.modName)}`)
 } catch (e) {
     logger.error(`Fatal error: ${red(e instanceof Error ? e.message : String(e))}`)

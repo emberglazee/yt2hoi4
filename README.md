@@ -15,12 +15,13 @@ And was tested on:
 - Bun v1.2.14
 - yt-dlp v2025.05.22
 - ffmpeg v7.1
+- ImageMagick v7.1.1-47
 - Hearts of Iron IV v1.16.8
 - Windows 11 24H2 (might personally test for Ubuntu)
 
 ## Installation
 
-Install [yt-dlp](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#installation), [FFmpeg](https://ffmpeg.org/download.html), and [Bun](https://bun.sh)
+Install [yt-dlp](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#installation), [FFmpeg](https://ffmpeg.org/download.html), [Bun](https://bun.sh), and optionally [ImageMagick](https://imagemagick.org/script/download.php) for the --use-thumbnail option
 
 ```bash
 # Ensure yt-dlp is on PATH (optionally check if your current version works with YouTube right now; regular updates recommended)
@@ -33,6 +34,10 @@ built with gcc 14.2.0 (Rev1, Built by MSYS2 project)
 # ...and Bun
 $ bun -v
 1.2.14
+# If you plan to use custom thumbnails, check ImageMagick too
+$ magick --version
+Version: ImageMagick 7.1.1-47 Q16-HDRI x64 82572af:20250329 https://imagemagick.org
+...
 
 # Clone the repository
 $ git clone https://github.com/emberglazee/yt2hoi4
@@ -45,9 +50,11 @@ $ bun install
 ## Usage
 
 ```bash
+# Basic usage with default radio station faceplate
 $ bun start --url <yt-dlp_compatible_link> --mod-name <mod-name>
-# Then copy paste the contents of the `output` folder into the user mods folder (on Windows its `Documents\Paradox Interactive\Hearts of Iron IV\mods)
-# Paradox Launcher will not tell you about a new user mod, go into the mod list yourself and select the mod for a playset
+
+# Use the video/playlist thumbnail as the radio station faceplate (requires ImageMagick)
+$ bun start --url <yt-dlp_compatible_link> --mod-name <mod-name> --use-thumbnail
 
 # Optionally you can also pass your own yt-dlp args:
 $ bun start --url ... --mod-name ... --ytdlp-args --cookies-from-browser firefox --proxy socks5://localhost:1080 ...
@@ -59,6 +66,7 @@ $ clear.cmd # for Command Prompt (or double click in Explorer)
 # To update:
 $ git pull
 ```
+
 ## Screenshot
 
 ![screenshot](https://github.com/user-attachments/assets/e26f222a-966c-435c-a41b-cf78787fb7ed)

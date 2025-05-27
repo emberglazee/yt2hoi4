@@ -113,6 +113,62 @@ class Downloader {
             this.logger.error(`Some files failed to convert for ${yellow(url)}`)
         }
     }
+
+    /**
+     * Download a thumbnail from a YouTube video or playlist URL
+     * @param url The YouTube video or playlist URL
+     * @returns Path to the downloaded thumbnail file
+     */
+    public async downloadThumbnail(url: string): Promise<string> {
+        this.logger.info(`Downloading thumbnail for: ${yellow(url)}`)
+
+        // Ensure downloads directory exists
+        await $`mkdir -p ${this.downloadsDir}`
+
+        const thumbnailPath = join(this.downloadsDir, 'thumbnail.jpg')
+
+        // Use yt-dlp to download only the playlist/video thumbnail
+        const cmd = [
+            'yt-dlp',
+            '--write-thumbnail',
+            '--skip-download',
+            '--playlist-items', '0',  // Only get playlist info, no individual videos
+            '--convert-thumbnails',
+            'jpg',
+            '--output',
+            thumbnailPath.replace(/\.jpg$/, ''), // yt-dlp will add the extension
+            url
+        ]
+
+        const proc = Bun.spawn({
+            cmd,
+            stdout: 'pipe',
+            stderr: 'pipe'
+        })
+
+        // Print stdout and stderr in real time
+        const printStream = async (stream: ReadableStream<Uint8Array>, label: string) => {
+            for await (const chunk of stream) {
+                Bun.write(Bun.stdout, `[${label}] `)
+                Bun.write(Bun.stdout, chunk)
+            }
+        }
+
+        await Promise.all([
+            printStream(proc.stdout, 'yt-dlp'),
+            printStream(proc.stderr, 'yt-dlp-err'),
+            proc.exited
+        ])
+
+        if (proc.exitCode !== 0) {
+            const errMsg = `yt-dlp exited with code ${red(proc.exitCode?.toString() ?? 'unknown')}`
+            this.logger.error(`Failed to download thumbnail for ${yellow(url)}: ${errMsg}`)
+            throw new Error(errMsg)
+        }
+
+        this.logger.ok(`Downloaded thumbnail for ${yellow(url)}`)
+        return thumbnailPath
+    }
 }
 
 export default Downloader
