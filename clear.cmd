@@ -1,6 +1,4 @@
 @echo off
-REM Delete tracker.json if it exists
-if exist tracker.json del /f /q tracker.json
 
 REM Delete all files and folders in downloads\ if it exists
 if exist downloads (

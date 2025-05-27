@@ -3,6 +3,7 @@ downloads/
 output/
 tracker.json
 cookies.txt
+.vscode
 # dependencies (bun install)
 node_modules
 
