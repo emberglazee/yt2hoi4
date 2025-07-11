@@ -1,58 +1,62 @@
-import { write } from 'bun'
 import { Logger, yellow } from './logger'
+const logger = new Logger('ModGenerator')
+
+import { $, write } from 'bun'
 import { join } from 'path'
 import { version as modVersion } from '../package.json'
 import { ScriptHandler } from './scriptHandler'
 import Downloader from './downloader'
+import { randomUUID } from 'crypto'
 
-
-class ModGenerator {
-    private static instance: ModGenerator
-    private logger = new Logger('ModGenerator')
-
-    private constructor() {}
-
-    public static async getInstance(): Promise<ModGenerator> {
-        if (!ModGenerator.instance) {
-            ModGenerator.instance = new ModGenerator()
-        }
-        return ModGenerator.instance
+export default class ModGenerator {
+    public static modName: string
+    public static normalizedModName: string
+    constructor(modName: string) {
+        ModGenerator.modName = modName
+        ModGenerator.normalizedModName = modName.replace(/[^A-Za-z0-9_]/g, '_').replace(/^_+|_+$/g, '')
     }
-
     /**
      * Process a thumbnail image into a radio station faceplate
      * @param thumbnailPath Path to the thumbnail image
      * @param outputPath Path where the processed DDS file should be saved
+     * @param verbose Show external tool output
      */
-    private async processThumbnail(thumbnailPath: string, outputPath: string): Promise<void> {
-        this.logger.info(`Processing thumbnail ${yellow(thumbnailPath)} into faceplate`)
+    private async processThumbnail(thumbnailPath: string, outputPath: string, verbose?: boolean): Promise<void> {
+        logger.info(`Processing thumbnail ${yellow(thumbnailPath)} into faceplate`)
 
         // Create a temporary working directory
         const tempDir = join(process.cwd(), 'temp')
-        await Bun.$`mkdir -p ${tempDir}`
+        await $`mkdir -p ${tempDir}`.quiet()
 
         try {
             // 1. Resize and crop the thumbnail to 152x120
             const resizedPath = join(tempDir, 'resized.png')
-            await Bun.$`ffmpeg -y -i ${thumbnailPath} -vf "scale=152:120:force_original_aspect_ratio=increase,crop=152:120" ${resizedPath}`
+            let resizeCmd = $`ffmpeg -y -i ${thumbnailPath} -vf "scale=152:120:force_original_aspect_ratio=increase,crop=152:120" ${resizedPath}`
+            if (!verbose) resizeCmd = resizeCmd.quiet()
+            await resizeCmd
 
             // 2. Create a 304x120 image with the resized thumbnail duplicated
             const combinedPath = join(tempDir, 'combined.png')
-            await Bun.$`ffmpeg -y -i ${resizedPath} -filter_complex "[0]split[left][right];[left]pad=304:120[left_pad];[right]pad=304:120:152:0[right_pad];[left_pad][right_pad]blend=all_mode=addition" ${combinedPath}`
+            let combineCmd = $`ffmpeg -y -i ${resizedPath} -filter_complex "[0]split[left][right];[left]pad=304:120[left_pad];[right]pad=304:120:152:0[right_pad];[left_pad][right_pad]blend=all_mode=addition" ${combinedPath}`
+            if (!verbose) combineCmd = combineCmd.quiet()
+            await combineCmd
 
             // 3. Overlay the template
             const templatePath = join(process.cwd(), 'radio_station_cover_template.png')
             const overlaidPath = join(tempDir, 'overlaid.png')
-            await Bun.$`ffmpeg -y -i ${combinedPath} -i ${templatePath} -filter_complex "[0][1]overlay=0:0" ${overlaidPath}`
+            let overlayCmd = $`ffmpeg -y -i ${combinedPath} -i ${templatePath} -filter_complex "[0][1]overlay=0:0" ${overlaidPath}`
+            if (!verbose) overlayCmd = overlayCmd.quiet()
+            await overlayCmd
 
             // 4. Convert to DDS format using ImageMagick
-            // First, ensure the image is in the correct format (RGBA)
-            await Bun.$`magick convert ${overlaidPath} -define dds:compression=none -define dds:mipmaps=0 -define dds:format=dxt5 ${outputPath}`
+            let convertCmd = $`magick convert ${overlaidPath} -define dds:compression=none -define dds:mipmaps=0 -define dds:format=dxt5 ${outputPath}`
+            if (!verbose) convertCmd = convertCmd.quiet()
+            await convertCmd
 
-            this.logger.ok(`Successfully created faceplate at ${yellow(outputPath)}`)
+            logger.ok(`Successfully created faceplate at ${yellow(outputPath)}`)
         } finally {
             // Clean up temporary files
-            await Bun.$`rm -rf ${tempDir}`
+            await $`rm -rf ${tempDir}`.quiet()
         }
     }
 
@@ -63,72 +67,73 @@ class ModGenerator {
      * @param hoi4Version HOI4 game version to support
      * @param url YouTube URL for thumbnail download (only used if useThumbnail is true)
      * @param useThumbnail Whether to use the playlist/video thumbnail as faceplate (defaults to false)
+     * @param verbose Show external tool output
      */
-    public async generateMod(
-        modName: string,
+    public async generateMusicMod(
         trackFiles: string[],
         hoi4Version: string,
         url?: string,
-        useThumbnail: boolean = false
+        useThumbnail: boolean = false,
+        verbose?: boolean
     ): Promise<void> {
-        const scriptHandler = ScriptHandler.getInstance(modName)
+        const scriptHandler = new ScriptHandler()
 
-        this.logger.info(`Setting up mod structure for ${yellow(modName)}`)
+        logger.info('Setting up the mod structure')
         await scriptHandler.prepareModFolders()
 
         // Handle faceplate
-        const faceplateOutput = `${scriptHandler.gfxDir}/${modName}_faceplate.dds`
+        const faceplateOutput = `${scriptHandler.gfxDir}/${ModGenerator.normalizedModName}_faceplate.dds`
         if (useThumbnail && url) {
             // Download and process thumbnail if URL is provided and useThumbnail is true
-            const downloader = Downloader.getInstance()
-            const thumbnailPath = await downloader.downloadThumbnail(url)
-            await this.processThumbnail(thumbnailPath, faceplateOutput)
+            const downloader = new Downloader()
+            const thumbnailPath = await downloader.downloadThumbnail(url, verbose)
+            await this.processThumbnail(thumbnailPath, faceplateOutput, verbose)
         } else {
             // Use default faceplate
-            const dds = Bun.file(join(__dirname, '../radio_station.dds'))
+            const dds = Bun.file(join(process.cwd(), 'radio_station.dds'))
             await write(faceplateOutput, dds)
             if (useThumbnail && !url) {
-                this.logger.warn('useThumbnail was set to true but no URL was provided. Using default faceplate.')
+                logger.warn('useThumbnail was set to true but no URL was provided. Using default faceplate.')
             }
         }
 
-        // Copy .ogg files to music/modName
+        const tracks: { id: string, displayName: string, fileName: string }[] = []
+
+        // Copy .ogg files to music/normalizedModName with UUID filenames, and prepare track data
         for (const src of trackFiles) {
-            const base = src.replace(/^.*\//, '')
-            const dest = `${scriptHandler.musicDir}/${base}`
-            await Bun.$`cp ./downloads/${base} ${dest}`
-            this.logger.info(`Copied ${yellow(base)} to ${yellow(dest)}`)
+            const originalFileName = src.replace(/^.*\//, '')
+            const displayName = originalFileName.replace(/\..*$/, '') // remove the extension for display
+            const newFileName = `${randomUUID().replace(/-/g, '')}.ogg`
+            const dest = `${scriptHandler.musicDir}/${newFileName}`
+            const sourceFile = join(Downloader.downloadsDir, originalFileName)
+
+            let cmd = $`cp ${sourceFile} ${dest}`
+            if (!verbose) {
+                cmd = cmd.quiet()
+            }
+            await cmd
+            logger.info(`Copied ${yellow(originalFileName)} to ${yellow(dest)}`)
+
+            tracks.push({
+                id: `music_${randomUUID().replace(/-/g, '')}`,
+                displayName,
+                fileName: newFileName
+            })
         }
 
-        // Write both mod descriptor files
         await scriptHandler.createModDescriptor(hoi4Version)
-        await scriptHandler.createUserModDescriptor(hoi4Version, modVersion)
+        await scriptHandler.createLocalModDescriptor(modVersion)
 
-        // Write localization file
-        const trackLocKeys: Record<string, string> = {}
-        for (const src of trackFiles) {
-            const base = src.replace(/^.*\//, '') // remove the path
-            const displayName = base.replace(/\..*$/, '') // remove the extension for display
-            trackLocKeys[base] = displayName
-        }
-        await scriptHandler.createLocalization(trackLocKeys)
-        this.logger.ok(`Wrote localization file ${yellow(modName)}`)
+        await scriptHandler.createLocalization(tracks)
 
-        // Write interface files
-        // .gfx file
         await scriptHandler.createGFX()
-        // .gui file
         await scriptHandler.createGUI()
-        this.logger.ok(`Wrote interface files for ${yellow(modName)}`)
 
-        // Write music script
-        await scriptHandler.createMusicDefinition(trackLocKeys)
+        await scriptHandler.createMusicDefinition(tracks)
 
-        // Write music asset file
-        await scriptHandler.createMusicAsset(trackLocKeys)
+        await scriptHandler.createMusicAsset(tracks)
 
-        this.logger.ok(`Mod generation complete for ${yellow(modName)}`)
+        // eslint-disable-next-line no-useless-escape
+        logger.ok('Mod generation complete!\a') // '\a' - Bell character
     }
 }
-
-export default ModGenerator

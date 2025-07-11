@@ -62,4 +62,4 @@ function logoutput(level: 'err' | 'warn' | 'info' | 'ok', data: JSONResolvable, 
     return str
 }
 
-export type JSONResolvable = string | number | boolean | {[key: string]: JSONResolvable} | {[key: string]: JSONResolvable}[] | null
+export type JSONResolvable = string | number | boolean | { [key: string]: JSONResolvable } | { [key: string]: JSONResolvable }[] | null

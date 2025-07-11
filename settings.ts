@@ -7,7 +7,11 @@ export default {
             `${downloadsDir}/%(title)s.%(ext)s`,
             '-f',
             'bestaudio/best',
-            ...(ytdlpArgs || [])
+            '--extract-audio',
+            '--audio-format', 'vorbis',
+            '--audio-quality', '192K',
+            ...(ytdlpArgs || []),
+            '--postprocessor-args', '-ar 44100'
         ] as const
     } as const
 }
