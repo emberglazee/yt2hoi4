@@ -11,7 +11,7 @@ export class ScriptHandler {
     private buildLocalization(tracks: { id: string, displayName: string }[]) {
         let localization = `l_english:\n  ${ModGenerator.normalizedModName}_TITLE: "${ModGenerator.modName} Radio"\n`
         for (const track of tracks) {
-            localization += `  ${track.id}: "${track.displayName.replace(/：/g, ':')}"\n`
+            localization += `  ${track.id}: "${track.displayName.replace(/：/g, ':').replace(/＂/g, '"')}"\n`
         }
         return localization
     }

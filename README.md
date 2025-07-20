@@ -1,4 +1,4 @@
-# yt2hoi4 v0.2.0+hoi4-1.16.9
+# yt2hoi4 v0.2.1
 
 > This project is a proof of concept. Unless you have [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org), and [Bun](https://bun.sh) installed and ready to go, you will probably be better off with an alternative project, like the [Music Mod Creation Tool for Paradox Interactive Games](https://runite-drill.github.io/music-mod-creation-tool)
 
@@ -14,12 +14,12 @@ This project requires:
 
 And was tested with:
 
-- Bun v1.2.18
+- Bun v1.2.19
 - yt-dlp v2025.06.30
 - ffmpeg v7.1.1
 - ImageMagick v7.1.1-47 Q16-HDRI
 - Hearts of Iron IV v1.16.9
-- Windows 11 24H2 (might personally test for Ubuntu)
+- Windows 11 24H2, build 26120
 
 ## Installation
 
@@ -35,7 +35,7 @@ ffmpeg version 7.1.1-full_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg 
 built with gcc 14.2.0 (Rev1, Built by MSYS2 project)
 # And with Bun
 $ bun -v
-1.2.18
+1.2.19
 # ImageMagick is only required for custom thumbnails, they're optional
 $ magick --version
 Version: ImageMagick 7.1.1-47 Q16-HDRI x64 82572af:20250329 https://imagemagick.org
@@ -76,6 +76,10 @@ $ git pull
 ## Screenshot
 
 ![screenshot](https://github.com/user-attachments/assets/e26f222a-966c-435c-a41b-cf78787fb7ed)
+
+## Steam Workshop examples
+
+[Bo's HoI4 MP In A Nutshell - The Podcast](https://steamcommunity.com/sharedfiles/filedetails/?id=3529621862) - 391 audio files with a combined length of 
 
 ## Why?
 
