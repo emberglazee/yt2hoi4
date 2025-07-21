@@ -79,7 +79,9 @@ $ git pull
 
 ## Steam Workshop examples
 
-[Bo's HoI4 MP In A Nutshell - The Podcast](https://steamcommunity.com/sharedfiles/filedetails/?id=3529621862) - 391 audio files with a combined length of 
+* [Bo's HoI4 MP In A Nutshell - The Podcast](https://steamcommunity.com/sharedfiles/filedetails/?id=3529621862) - 391 audio files with a combined length of 58.5 hours in a single radio station
+
+* [Project Wingman: Frontline-59 OST Music Mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3488744542)
 
 ## Why?
 
