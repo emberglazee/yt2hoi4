@@ -49,7 +49,7 @@ export default class ModGenerator {
             await overlayCmd
 
             // 4. Convert to DDS format using ImageMagick
-            let convertCmd = $`magick convert ${overlaidPath} -define dds:compression=none -define dds:mipmaps=0 -define dds:format=dxt5 ${outputPath}`
+            let convertCmd = $`magick ${overlaidPath} -define dds:compression=none -define dds:mipmaps=0 -define dds:format=dxt5 ${outputPath}`
             if (!verbose) convertCmd = convertCmd.quiet()
             await convertCmd
 

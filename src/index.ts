@@ -6,6 +6,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { ScriptHandler } from './scriptHandler'
 import { HOI4_VERSION } from './config'
+import { join } from 'path'
 
 const logger = new Logger()
 
@@ -60,7 +61,7 @@ if (argv.clear) {
     logger.info('Cleaning up downloads and output folders...')
     try {
         await $`rm -rf ${Downloader.downloadsDir}`.quiet()
-        await $`rm -rf ${ScriptHandler.OUTPUT_ROOT}`.quiet()
+        await $`rm -rf ${join(process.cwd(), ScriptHandler.OUTPUT_ROOT)}`.quiet()
         logger.ok('Cleanup complete.')
         process.exit(0)
     } catch (e) {
@@ -72,7 +73,7 @@ if (argv.clear) {
 try {
     logger.info(`Starting download for ${yellow(argv.url!)}`)
     const downloader = new Downloader()
-    await downloader.download(argv.url!, argv['ytdlp-args'] as string[], argv.ignoreYtdlpErrors, argv.verbose)
+    await downloader.download(argv.url!, argv.ytdlpArgs as string[], argv.ignoreYtdlpErrors, argv.verbose)
     logger.ok(`Download complete for ${yellow(argv.url!)}`)
 
     const files = (await $`ls ${Downloader.downloadsDir}`.text()).split('\n').filter(Boolean)
