@@ -133,7 +133,8 @@ export default class ModGenerator {
 
         await scriptHandler.createMusicAsset(tracks)
 
+        logger.ok('Mod generation complete!')
         // eslint-disable-next-line no-useless-escape
-        logger.ok('Mod generation complete!\a') // '\a' - Bell character
+        process.stdout.write('\a') // '\a' - Bell character
     }
 }
