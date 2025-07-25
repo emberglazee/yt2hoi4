@@ -1,4 +1,4 @@
-import { Logger, yellow, red } from './logger'
+import { Logger, yellow, red, green } from './logger'
 const logger = new Logger('Downloader')
 
 import { $ } from 'bun'
@@ -19,7 +19,7 @@ export default class Downloader {
     * @param verbose Show yt-dlp output
     */
     public async download(url: string, ytdlpArgs: string[] = [], ignoreErrors?: boolean, verbose?: boolean): Promise<void> {
-        logger.info(`Preparing to download: ${yellow(url)}`)
+        logger.info(`{download} Beginning download for "${green(url)}"...`)
 
         // Ensure downloads directory exists
         await $`mkdir -p ${Downloader.downloadsDir}`.quiet()
@@ -34,19 +34,19 @@ export default class Downloader {
             try {
                 watcher = watch(Downloader.downloadsDir, (_, filename) => {
                     if (filename && filename.endsWith('.ogg') && !seenFiles.has(filename)) {
-                        logger.info(`Finished converting ${yellow(filename)}`)
+                        logger.info(`{download} ✓ ${green(filename)}`)
                         seenFiles.add(filename)
                     }
                 })
             } catch (e) {
-                logger.warn(`Could not start file watcher: ${e}`)
+                logger.warn(`{download} Could not start file watcher: ${e}`)
             }
         }
 
         const runYtdlp = async (check: boolean = false) => {
             const stage = check ? 'double-check' : 'initial download'
             const logPrefix = check ? 'yt-dlp-check' : 'yt-dlp'
-            logger.info(`Spawning yt-dlp for ${yellow(url)} (${stage})`)
+            logger.info(`{download} Spawning yt-dlp for "${green(url)}" (${green(stage)})`)
 
             const proc = Bun.spawn({
                 cmd: [...cmd],
@@ -67,9 +67,9 @@ export default class Downloader {
             if (proc.exitCode !== 0) {
                 const errMsg = `yt-dlp exited with code ${red(proc.exitCode?.toString() ?? 'unknown')} on ${stage}`
                 if (proc.exitCode === 1 && ignoreErrors) {
-                    logger.warn(`Ignoring yt-dlp exit code 1 for ${yellow(url)} on ${stage} as requested.`)
+                    logger.warn(`{download} Ignoring yt-dlp exit code 1 for ${green(url)} on ${green(stage)} as requested.`)
                 } else {
-                    logger.error(`Failed to download ${yellow(url)} on ${stage}: ${errMsg}`)
+                    logger.error(`{download} Failed to download ${green(url)} on ${green(stage)}: ${errMsg}`)
                     throw new Error(errMsg)
                 }
             }
@@ -84,7 +84,7 @@ export default class Downloader {
             }
         }
 
-        logger.ok(`Downloaded and converted ${yellow(url)} to .ogg files`)
+        logger.ok(`{download} Downloaded "${green(url)}" and processed into .ogg files.`)
     }
 
     /**
@@ -94,7 +94,7 @@ export default class Downloader {
      * @returns Path to the downloaded thumbnail file
      */
     public async downloadThumbnail(url: string, verbose?: boolean): Promise<string> {
-        logger.info(`Downloading thumbnail for: ${yellow(url)}`)
+        logger.info(`{downloadThumbnail} Getting the thumbnail for "${green(url)}"...`)
 
         // Ensure downloads directory exists
         await $`mkdir -p ${Downloader.downloadsDir}`.quiet()

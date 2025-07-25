@@ -17,6 +17,7 @@ export class ScriptHandler {
                     .replace(/＂/g, '\\"') // Make sure we're escaping the quotes in the name itself
                     .replace(/｜/g, '|')
                     .replace(/【/g, '[').replace(/】/g, ']')
+                    .replace(/？/g, '?')
             }"\n`
         }
         return localization
@@ -26,7 +27,7 @@ export class ScriptHandler {
         const locBuffer = Buffer.concat([Buffer.from([0xEF, 0xBB, 0xBF]), Buffer.from(loc)])
         const filePath = `${this.localisationDir}/${ModGenerator.normalizedModName}_l_english.yml`
         await write(filePath, locBuffer)
-        logger.ok(`Wrote the localization to "${green(filePath)}"`)
+        logger.ok(`{createLocalization} ✓ ${green(filePath)}`)
         return {
             __fileName: `${ModGenerator.normalizedModName}_l_english.yml`
         }
@@ -44,7 +45,7 @@ export class ScriptHandler {
         const musicScript = this.buildMusicDefinition(tracks)
         const filePath = `${this.musicDir}/${ModGenerator.normalizedModName}_music.txt`
         await write(filePath, musicScript)
-        logger.ok(`Wrote the music definition to "${green(filePath)}"`)
+        logger.ok(`{createMusicDefinition} ✓ ${green(filePath)}`)
         return {
             __fileName: `${ModGenerator.normalizedModName}_music.txt`
         }
@@ -62,7 +63,7 @@ export class ScriptHandler {
         const musicAsset = this.buildMusicAsset(tracks)
         const filePath = `${this.musicDir}/${ModGenerator.normalizedModName}_music.asset`
         await write(filePath, musicAsset)
-        logger.ok(`Wrote the music asset information to "${green(filePath)}"`)
+        logger.ok(`{createMusicAsset} ✓ ${green(filePath)}`)
         return {
             __fileName: `${ModGenerator.normalizedModName}_music.asset`
         }
@@ -82,7 +83,7 @@ export class ScriptHandler {
         const gfxContent = this.buildGFX()
         const filePath = `${this.interfaceDir}/${ModGenerator.normalizedModName}.gfx`
         await write(filePath, gfxContent)
-        logger.ok(`Wrote the radio station GFX to "${green(filePath)}"`)
+        logger.ok(`{createGFX} ✓ ${green(filePath)}`)
         return {
             __fileName: `${ModGenerator.normalizedModName}.gfx`
         }
@@ -217,7 +218,7 @@ export class ScriptHandler {
         const guiContent = this.buildGUI()
         const filePath = `${this.interfaceDir}/${ModGenerator.normalizedModName}.gui`
         await write(filePath, guiContent)
-        logger.ok(`Wrote the radio station GUI to "${green(filePath)}"`)
+        logger.ok(`{createGUI} ✓ ${green(filePath)}`)
         return {
             __fileName: `${ModGenerator.normalizedModName}.gui`
         }
@@ -233,7 +234,7 @@ supported_version="${hoi4Version}"\n`
         const modDescriptor = this.buildModDescriptor(hoi4Version)
         const filePath = `${this.modRoot}/${ModGenerator.normalizedModName}.mod`
         await write(filePath, modDescriptor)
-        logger.ok(`Wrote the mod descriptor to "${green(filePath)}"`)
+        logger.ok(`{createModDescriptor} ✓ ${green(filePath)}`)
         return {
             __fileName: `${ModGenerator.normalizedModName}.mod`
         }
@@ -252,7 +253,7 @@ version = "${modVersion}"\n`
         const localModDescriptor = this.buildLocalModDescriptor(modVersion)
         const filePath = `${ScriptHandler.OUTPUT_ROOT}/${ModGenerator.normalizedModName}.mod`
         await write(filePath, localModDescriptor)
-        logger.ok(`Wrote the local mod descriptor to "${green(filePath)}"`)
+        logger.ok(`{createLocalModDescriptor} ✓ ${green(filePath)}`)
         return {
             __fileName: `${ModGenerator.normalizedModName}.mod`
         }
@@ -286,5 +287,5 @@ version = "${modVersion}"\n`
 
 // ts dev ergonomics asf 💅💅💅
 type Script<FileName extends string> = {
-    __fileName: FileName;
+    __fileName: FileName
 }

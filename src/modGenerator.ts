@@ -1,4 +1,4 @@
-import { Logger, yellow } from './logger'
+import { green, Logger } from './logger'
 const logger = new Logger('ModGenerator')
 
 import { $, write } from 'bun'
@@ -22,7 +22,7 @@ export default class ModGenerator {
      * @param verbose Show external tool output
      */
     private async processThumbnail(thumbnailPath: string, outputPath: string, verbose?: boolean): Promise<void> {
-        logger.info(`Processing thumbnail ${yellow(thumbnailPath)} into faceplate`)
+        logger.info(`{processThumbnail} Processing thumbnail "${green(thumbnailPath)}" into faceplate...`)
 
         // Create a temporary working directory
         const tempDir = join(process.cwd(), 'temp')
@@ -53,7 +53,7 @@ export default class ModGenerator {
             if (!verbose) convertCmd = convertCmd.quiet()
             await convertCmd
 
-            logger.ok(`Successfully created faceplate at ${yellow(outputPath)}`)
+            logger.ok(`{processThumbnail} ✓ ${green(outputPath)}`)
         } finally {
             // Clean up temporary files
             await $`rm -rf ${tempDir}`.quiet()
@@ -78,7 +78,7 @@ export default class ModGenerator {
     ): Promise<void> {
         const scriptHandler = new ScriptHandler()
 
-        logger.info('Setting up the mod structure')
+        logger.info('{generateMusicMod} Setting up the mod structure...')
         await scriptHandler.prepareModFolders()
 
         // Handle faceplate
@@ -93,7 +93,7 @@ export default class ModGenerator {
             const dds = Bun.file(join(process.cwd(), 'radio_station.dds'))
             await write(faceplateOutput, dds)
             if (useThumbnail && !url) {
-                logger.warn('useThumbnail was set to true but no URL was provided. Using default faceplate.')
+                logger.warn('{generateMusicMod} useThumbnail was set to true but no URL was provided. Using default faceplate.')
             }
         }
 
@@ -112,7 +112,7 @@ export default class ModGenerator {
                 cmd = cmd.quiet()
             }
             await cmd
-            logger.info(`Copied ${yellow(originalFileName)} to ${yellow(dest)}`)
+            logger.info(`{generateMusicMod} Copied "${green(originalFileName)}" => "${green(dest)}"`)
 
             tracks.push({
                 id: `music_${randomUUID().replace(/-/g, '')}`,
@@ -133,8 +133,6 @@ export default class ModGenerator {
 
         await scriptHandler.createMusicAsset(tracks)
 
-        logger.ok('Mod generation complete!')
-        // eslint-disable-next-line no-useless-escape
-        process.stdout.write('\a') // '\a' - Bell character
+        logger.ok('{generateMusicMod} Done!')
     }
 }
