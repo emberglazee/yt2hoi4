@@ -224,15 +224,17 @@ export class ScriptHandler {
         }
     }
 
-    private buildModDescriptor(hoi4Version: string) {
-        // ${normalizedModName}.mod
-        const modDescriptor = `name="${ModGenerator.modName}"
-supported_version="${hoi4Version}"\n`
+    private buildModDescriptor(hoi4Version: string, modVersion: string) {
+        // descriptor.mod
+        const modDescriptor = `name = "${ModGenerator.modName}"
+version = "${modVersion}"
+supported_version = "${hoi4Version}"
+tags = { "Sound" }\n`
         return modDescriptor
     }
-    public async createModDescriptor(hoi4Version: string): Promise<Script<`${string}.mod`>> {
-        const modDescriptor = this.buildModDescriptor(hoi4Version)
-        const filePath = `${this.modRoot}/${ModGenerator.normalizedModName}.mod`
+    public async createModDescriptor(hoi4Version: string, modVersion: string): Promise<Script<`${string}.mod`>> {
+        const modDescriptor = this.buildModDescriptor(hoi4Version, modVersion)
+        const filePath = `${this.modRoot}/descriptor.mod`
         await write(filePath, modDescriptor)
         logger.ok(`{createModDescriptor} ✓ ${green(filePath)}`)
         return {
@@ -243,10 +245,10 @@ supported_version="${hoi4Version}"\n`
     private buildLocalModDescriptor(modVersion: string) {
         // ${normalizedModName}.mod
         const localModDescriptor = `name = "${ModGenerator.modName}"
-tags = { "Sound" }
-path = "mod/${ModGenerator.normalizedModName}"
+version = "${modVersion}"
 supported_version = "${HOI4_VERSION}"
-version = "${modVersion}"\n`
+tags = { "Sound" }
+path = "mod/${ModGenerator.normalizedModName}"\n`
         return localModDescriptor
     }
     public async createLocalModDescriptor(modVersion: string): Promise<Script<`${string}.mod`>> {

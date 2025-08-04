@@ -121,7 +121,7 @@ export default class ModGenerator {
             })
         }
 
-        await scriptHandler.createModDescriptor(hoi4Version)
+        await scriptHandler.createModDescriptor(hoi4Version, modVersion)
         await scriptHandler.createLocalModDescriptor(modVersion)
 
         await scriptHandler.createLocalization(tracks)
