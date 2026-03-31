@@ -1,24 +1,25 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "yt2hoi4",
       "dependencies": {
-        "chalk": "latest",
-        "tseep": "latest",
-        "yargs": "latest",
+        "chalk": "^5.4.1",
+        "tseep": "^1.3.1",
+        "yargs": "^18.0.0",
       },
       "devDependencies": {
-        "@types/bun": "latest",
-        "@types/node": "latest",
-        "@types/yargs": "latest",
-        "eslint": "latest",
-        "prettier": "latest",
-        "prettier-eslint": "latest",
-        "typescript-eslint": "latest",
+        "@types/bun": "^1.2.19",
+        "@types/node": "^24.1.0",
+        "@types/yargs": "^17.0.33",
+        "eslint": "^9.31.0",
+        "prettier": "^3.6.2",
+        "prettier-eslint": "^16.4.2",
+        "typescript-eslint": "^8.38.0",
       },
       "peerDependencies": {
-        "typescript": "latest",
+        "typescript": "^5.8.3 || ^6.0.0",
       },
     },
   },
