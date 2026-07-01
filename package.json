@@ -7,7 +7,7 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "^1.2.19",
-    "@types/node": "^24.1.0",
+    "@types/node": "^26.0.0",
     "@types/yargs": "^17.0.33",
     "eslint": "^9.31.0",
     "prettier": "^3.6.2",
