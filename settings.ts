@@ -1,3 +1,5 @@
+import { AUDIO_FORMAT, AUDIO_QUALITY, AUDIO_SAMPLE_RATE } from './src/config'
+
 export default {
     downloader: {
         getCmd: (url: string, downloadsDir: string, ytdlpArgs?: string[]) => [
@@ -8,10 +10,10 @@ export default {
             '-f',
             'bestaudio/best',
             '--extract-audio',
-            '--audio-format', 'vorbis',
-            '--audio-quality', '192K',
+            '--audio-format', AUDIO_FORMAT,
+            '--audio-quality', AUDIO_QUALITY,
             ...(ytdlpArgs || []),
-            '--postprocessor-args', '-ar 44100'
+            '--postprocessor-args', `-ar ${AUDIO_SAMPLE_RATE}`
         ] as const
     } as const
 }

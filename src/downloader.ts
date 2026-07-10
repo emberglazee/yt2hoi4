@@ -6,10 +6,11 @@ import { join } from 'path'
 import settings from '../settings'
 import { printStream } from './utils'
 import { watch, type FSWatcher } from 'fs'
+import { DOWNLOADS_DIR_NAME, DOWNLOAD_ARCHIVE_FILE, THUMBNAIL_FILE } from './config'
 
 export default class Downloader {
-    static downloadsDir = join(process.cwd(), 'downloads')
-    static archivePath = join(Downloader.downloadsDir, '.yt2hoi4-archive.txt')
+    static downloadsDir = join(process.cwd(), DOWNLOADS_DIR_NAME)
+    static archivePath = join(Downloader.downloadsDir, DOWNLOAD_ARCHIVE_FILE)
 
     /**
     * Download a YouTube video or playlist to the downloads directory, then convert to ogg (Vorbis, 44.1kHz, 192kbps, s16)
@@ -102,7 +103,7 @@ export default class Downloader {
         // Ensure downloads directory exists
         await $`mkdir -p ${Downloader.downloadsDir}`.quiet()
 
-        const thumbnailPath = join(Downloader.downloadsDir, 'thumbnail.jpg')
+        const thumbnailPath = join(Downloader.downloadsDir, THUMBNAIL_FILE)
 
         // Use yt-dlp to download only the playlist/video thumbnail
         const cmd = [

@@ -2,7 +2,7 @@ import { green, Logger } from './logger'
 const logger = new Logger('ScriptHandler')
 
 import { $, write } from 'bun'
-import { HOI4_VERSION } from './config'
+import { HOI4_VERSION, OUTPUT_DIR_NAME, DEFAULT_MUSIC_VOLUME } from './config'
 
 export class ScriptHandler {
     private modName: string
@@ -59,7 +59,7 @@ export class ScriptHandler {
         // ${this.modName}_music.asset
         let musicAsset = ''
         for (const track of tracks) {
-            musicAsset += `music = { name = "${track.id}" file = "${track.fileName}" volume = 0.65 }\n`
+            musicAsset += `music = { name = "${track.id}" file = "${track.fileName}" volume = ${DEFAULT_MUSIC_VOLUME} }\n`
         }
         return musicAsset
     }
@@ -281,7 +281,7 @@ path = "mod/${this.normalizedModName}"\n`
     public get gfxDir(): `${typeof this.modRoot}/gfx` {
         return `${this.modRoot}/gfx`
     }
-    public static readonly OUTPUT_ROOT = './output'
+    public static readonly OUTPUT_ROOT = `./${OUTPUT_DIR_NAME}`
 
     public async prepareModFolders() {
         await $`mkdir -p ${this.musicDir}`
