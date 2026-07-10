@@ -9,11 +9,11 @@ import Downloader from './downloader'
 import { randomUUID } from 'crypto'
 
 export default class ModGenerator {
-    public static modName: string
-    public static normalizedModName: string
+    public modName: string
+    public normalizedModName: string
     constructor(modName: string) {
-        ModGenerator.modName = modName
-        ModGenerator.normalizedModName = modName.replace(/[^A-Za-z0-9_]/g, '_').replace(/^_+|_+$/g, '')
+        this.modName = modName
+        this.normalizedModName = modName.replace(/[^A-Za-z0-9_]/g, '_').replace(/^_+|_+$/g, '')
     }
     /**
      * Process a thumbnail image into a radio station faceplate
@@ -76,13 +76,13 @@ export default class ModGenerator {
         useThumbnail: boolean = false,
         verbose?: boolean
     ): Promise<void> {
-        const scriptHandler = new ScriptHandler()
+        const scriptHandler = new ScriptHandler(this.modName, this.normalizedModName)
 
         logger.info('{generateMusicMod} Setting up the mod structure...')
         await scriptHandler.prepareModFolders()
 
         // Handle faceplate
-        const faceplateOutput = `${scriptHandler.gfxDir}/${ModGenerator.normalizedModName}_faceplate.dds`
+        const faceplateOutput = `${scriptHandler.gfxDir}/${this.normalizedModName}_faceplate.dds`
         if (useThumbnail && url) {
             // Download and process thumbnail if URL is provided and useThumbnail is true
             const downloader = new Downloader()

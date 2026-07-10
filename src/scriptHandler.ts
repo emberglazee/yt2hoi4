@@ -4,12 +4,16 @@ const logger = new Logger('ScriptHandler')
 import { $, write } from 'bun'
 import { HOI4_VERSION } from './config'
 
-import ModGenerator from './modGenerator'
-
 export class ScriptHandler {
+    private modName: string
+    private normalizedModName: string
+    constructor(modName: string, normalizedModName: string) {
+        this.modName = modName
+        this.normalizedModName = normalizedModName
+    }
 
     private buildLocalization(tracks: { id: string, displayName: string }[]) {
-        let localization = `l_english:\n  ${ModGenerator.normalizedModName}_TITLE: "${ModGenerator.modName} Radio"\n`
+        let localization = `l_english:\n  ${this.normalizedModName}_TITLE: "${this.modName} Radio"\n`
         for (const track of tracks) {
             localization += `  ${track.id}: "${
                 track.displayName
@@ -25,17 +29,17 @@ export class ScriptHandler {
     public async createLocalization(tracks: { id: string, displayName: string }[]): Promise<Script<`${string}_l_english.yml`>> {
         const loc = this.buildLocalization(tracks)
         const locBuffer = Buffer.concat([Buffer.from([0xEF, 0xBB, 0xBF]), Buffer.from(loc)])
-        const filePath = `${this.localisationDir}/${ModGenerator.normalizedModName}_l_english.yml`
+        const filePath = `${this.localisationDir}/${this.normalizedModName}_l_english.yml`
         await write(filePath, locBuffer)
         logger.ok(`{createLocalization} ✓ ${green(filePath)}`)
         return {
-            __fileName: `${ModGenerator.normalizedModName}_l_english.yml`
+            __fileName: `${this.normalizedModName}_l_english.yml`
         }
     }
 
     private buildMusicDefinition(tracks: { id: string }[]) {
-        // ${ModGenerator.modName}_music.txt
-        let musicScript = `music_station = "${ModGenerator.normalizedModName}"\n`
+        // ${this.modName}_music.txt
+        let musicScript = `music_station = "${this.normalizedModName}"\n`
         for (const track of tracks) {
             musicScript += `music = { song = "${track.id}" chance = { factor = 1 modifier = { factor = 1 } } }\n`
         }
@@ -43,16 +47,16 @@ export class ScriptHandler {
     }
     public async createMusicDefinition(tracks: { id: string }[]): Promise<Script<`${string}_music.txt`>> {
         const musicScript = this.buildMusicDefinition(tracks)
-        const filePath = `${this.musicDir}/${ModGenerator.normalizedModName}_music.txt`
+        const filePath = `${this.musicDir}/${this.normalizedModName}_music.txt`
         await write(filePath, musicScript)
         logger.ok(`{createMusicDefinition} ✓ ${green(filePath)}`)
         return {
-            __fileName: `${ModGenerator.normalizedModName}_music.txt`
+            __fileName: `${this.normalizedModName}_music.txt`
         }
     }
 
     private buildMusicAsset(tracks: { id: string, fileName: string }[]) {
-        // ${ModGenerator.modName}_music.asset
+        // ${this.modName}_music.asset
         let musicAsset = ''
         for (const track of tracks) {
             musicAsset += `music = { name = "${track.id}" file = "${track.fileName}" volume = 0.65 }\n`
@@ -61,39 +65,39 @@ export class ScriptHandler {
     }
     public async createMusicAsset(tracks: { id: string, fileName: string }[]): Promise<Script<`${string}_music.asset`>> {
         const musicAsset = this.buildMusicAsset(tracks)
-        const filePath = `${this.musicDir}/${ModGenerator.normalizedModName}_music.asset`
+        const filePath = `${this.musicDir}/${this.normalizedModName}_music.asset`
         await write(filePath, musicAsset)
         logger.ok(`{createMusicAsset} ✓ ${green(filePath)}`)
         return {
-            __fileName: `${ModGenerator.normalizedModName}_music.asset`
+            __fileName: `${this.normalizedModName}_music.asset`
         }
     }
 
     private buildGFX() {
-        // ${ModGenerator.normalizedModName}.gfx
+        // ${this.normalizedModName}.gfx
         const gfxContent = `spriteTypes = {
     spriteType = {
-        name = "GFX_${ModGenerator.normalizedModName}_faceplate"
-        texturefile = "gfx/${ModGenerator.normalizedModName}_faceplate.dds"
+        name = "GFX_${this.normalizedModName}_faceplate"
+        texturefile = "gfx/${this.normalizedModName}_faceplate.dds"
         noOfFrames = 2
     }\n}` as const
         return gfxContent
     }
     public async createGFX(): Promise<Script<`${string}.gfx`>>    {
         const gfxContent = this.buildGFX()
-        const filePath = `${this.interfaceDir}/${ModGenerator.normalizedModName}.gfx`
+        const filePath = `${this.interfaceDir}/${this.normalizedModName}.gfx`
         await write(filePath, gfxContent)
         logger.ok(`{createGFX} ✓ ${green(filePath)}`)
         return {
-            __fileName: `${ModGenerator.normalizedModName}.gfx`
+            __fileName: `${this.normalizedModName}.gfx`
         }
     }
 
     private buildGUI() {
-        // ${ModGenerator.modName}.gui
+        // ${this.modName}.gui
         const guiContent = `guiTypes = {
 	containerWindowType = {
-		name = "${ModGenerator.normalizedModName}_faceplate"
+		name = "${this.normalizedModName}_faceplate"
 		position = { x =0 y=0 }
 		size = { width = 590 height = 46 }
 
@@ -203,12 +207,12 @@ export class ScriptHandler {
 	}
 
 	containerWindowType = {
-		name = "${ModGenerator.normalizedModName}_stations_entry"
+		name = "${this.normalizedModName}_stations_entry"
 		size = { width = 162 height = 130 }
 		checkBoxType = {
 			name = "select_station_button"
 			position = { x = 0 y = 0 }
-			quadTextureSprite = "GFX_${ModGenerator.normalizedModName}_faceplate"
+			quadTextureSprite = "GFX_${this.normalizedModName}_faceplate"
 			clicksound = decisions_ui_button
 		}
 	}\n}\n`
@@ -216,17 +220,17 @@ export class ScriptHandler {
     }
     public async createGUI(): Promise<Script<`${string}.gui`>> {
         const guiContent = this.buildGUI()
-        const filePath = `${this.interfaceDir}/${ModGenerator.normalizedModName}.gui`
+        const filePath = `${this.interfaceDir}/${this.normalizedModName}.gui`
         await write(filePath, guiContent)
         logger.ok(`{createGUI} ✓ ${green(filePath)}`)
         return {
-            __fileName: `${ModGenerator.normalizedModName}.gui`
+            __fileName: `${this.normalizedModName}.gui`
         }
     }
 
     private buildModDescriptor(hoi4Version: string, modVersion: string) {
         // descriptor.mod
-        const modDescriptor = `name = "${ModGenerator.modName}"
+        const modDescriptor = `name = "${this.modName}"
 version = "${modVersion}"
 supported_version = "${hoi4Version}"
 tags = { "Sound" }\n`
@@ -238,35 +242,35 @@ tags = { "Sound" }\n`
         await write(filePath, modDescriptor)
         logger.ok(`{createModDescriptor} ✓ ${green(filePath)}`)
         return {
-            __fileName: `${ModGenerator.normalizedModName}.mod`
+            __fileName: `${this.normalizedModName}.mod`
         }
     }
 
     private buildLocalModDescriptor(modVersion: string) {
         // ${normalizedModName}.mod
-        const localModDescriptor = `name = "${ModGenerator.modName}"
+        const localModDescriptor = `name = "${this.modName}"
 version = "${modVersion}"
 supported_version = "${HOI4_VERSION}"
 tags = { "Sound" }
-path = "mod/${ModGenerator.normalizedModName}"\n`
+path = "mod/${this.normalizedModName}"\n`
         return localModDescriptor
     }
     public async createLocalModDescriptor(modVersion: string): Promise<Script<`${string}.mod`>> {
         const localModDescriptor = this.buildLocalModDescriptor(modVersion)
-        const filePath = `${ScriptHandler.OUTPUT_ROOT}/${ModGenerator.normalizedModName}.mod`
+        const filePath = `${ScriptHandler.OUTPUT_ROOT}/${this.normalizedModName}.mod`
         await write(filePath, localModDescriptor)
         logger.ok(`{createLocalModDescriptor} ✓ ${green(filePath)}`)
         return {
-            __fileName: `${ModGenerator.normalizedModName}.mod`
+            __fileName: `${this.normalizedModName}.mod`
         }
     }
 
     // Path helpers for mod structure
-    public get modRoot(): `${typeof ScriptHandler.OUTPUT_ROOT}/${typeof ModGenerator.normalizedModName}` {
-        return `${ScriptHandler.OUTPUT_ROOT}/${ModGenerator.normalizedModName}`
+    public get modRoot(): `${typeof ScriptHandler.OUTPUT_ROOT}/${typeof this.normalizedModName}` {
+        return `${ScriptHandler.OUTPUT_ROOT}/${this.normalizedModName}`
     }
-    public get musicDir(): `${typeof this.modRoot}/music/${typeof ModGenerator.normalizedModName}` {
-        return `${this.modRoot}/music/${ModGenerator.normalizedModName}`
+    public get musicDir(): `${typeof this.modRoot}/music/${typeof this.normalizedModName}` {
+        return `${this.modRoot}/music/${this.normalizedModName}`
     }
     public get localisationDir(): `${typeof this.modRoot}/localisation` {
         return `${this.modRoot}/localisation`
