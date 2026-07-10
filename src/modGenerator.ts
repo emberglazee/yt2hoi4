@@ -114,7 +114,8 @@ export default class ModGenerator {
         for (const src of trackFiles) {
             const originalFileName = src.replace(/^.*\//, '')
             const displayName = originalFileName.replace(/\..*$/, '') // remove the extension for display
-            const newFileName = `${randomUUID().replace(/-/g, '')}.ogg`
+            const uuid = randomUUID().replace(/-/g, '')
+            const newFileName = `${uuid}.ogg`
             const dest = `${scriptHandler.musicDir}/${newFileName}`
             const sourceFile = join(Downloader.downloadsDir, originalFileName)
 
@@ -126,7 +127,7 @@ export default class ModGenerator {
             logger.info(`{generateMusicMod} Copied "${green(originalFileName)}" => "${green(dest)}"`)
 
             tracks.push({
-                id: `music_${randomUUID().replace(/-/g, '')}`,
+                id: `music_${uuid}`,
                 displayName,
                 fileName: newFileName
             })
