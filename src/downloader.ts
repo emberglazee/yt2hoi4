@@ -76,6 +76,9 @@ export default class Downloader {
         }
 
         try {
+            // Second pass with --download-archive is a safety net, not a re-download.
+            // yt-dlp skips every ID already in the archive and exits near-instantly.
+            // If the first pass crashed mid-playlist, the second picks up stragglers.
             await runYtdlp()
             await runYtdlp(true)
         } finally {
