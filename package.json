@@ -22,7 +22,7 @@
   "scripts": {
     "start": "bun src/index.ts",
     "cleanup": "bun src/index.ts --clear",
-    "update-version": "bun -e \"const fs = require('fs'); const path = require('path'); const configPath = path.join(__dirname, 'src', 'config.ts'); const packageJsonPath = path.join(__dirname, 'package.json'); const configContent = fs.readFileSync(configPath, 'utf-8'); const match = /export const HOI4_VERSION = '(.+)' as const/.exec(configContent); if (match) { const version = match[1]; const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')); packageJson.version = version; fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2)); console.log(`Updated package.json version to ${version}`); } else { console.error('Could not find HOI4_VERSION in src/config.ts'); process.exit(1); }\""
+    "update-version": "bun -e \"const fs = require('fs'); const path = require('path'); const configPath = path.join(__dirname, 'src', 'config.ts'); const packageJsonPath = path.join(__dirname, 'package.json'); const configContent = fs.readFileSync(configPath, 'utf-8'); const match = /export const HOI4_VERSION = '(.+)' as const/.exec(configContent); if (match) { const version = match[1]; const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')); packageJson.version = version; fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2)); console.log('Updated package.json version to ' + version); } else { console.error('Could not find HOI4_VERSION in src/config.ts'); process.exit(1); }\""
   },
   "dependencies": {
     "chalk": "^5.6.2",
