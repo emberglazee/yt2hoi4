@@ -15,15 +15,15 @@ This project requires:
 And was tested on:
 
 - Windows 11 24H2, build 26120
-- Arch Linux (6.18.2-zen2-1-zen)
-- Hearts of Iron IV v1.17.3.0
+- Arch Linux (7.1.3-zen1-1-zen)
+- Hearts of Iron IV v1.19.2.0
 
 with:
 
-- Bun v1.3.5
-- yt-dlp v2025.12.08
-- ffmpeg v8.0.1
-- ImageMagick v7.1.2-11 Q16-HDRI
+- Bun v1.3.14
+- yt-dlp v2026.07.04
+- ffmpeg v8.1.2
+- ImageMagick v7.1.2-26 Q16-HDRI
 
 ## Installation
 
@@ -40,17 +40,17 @@ with:
 # If the following commands run, you're fine
 
 $ yt-dlp --version
-2025.12.08
+2026.07.04
 
 $ ffmpeg -version
-ffmpeg version n8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
-built with gcc 15.2.1 (GCC) 20251112
+ffmpeg version n8.1.2 Copyright (c) 2000-2026 the FFmpeg developers
+...
 
 $ bun -v
-1.3.5
+1.3.14
 
 $ magick --version
-Version: ImageMagick 7.1.2-11 Q16-HDRI x86_64 3f47b60c0:20251211 https://imagemagick.org
+Version: ImageMagick 7.1.2-26 Q16-HDRI x86_64 702175ac4:20260621 https://imagemagick.org
 ...
 
 # Clone the repository
